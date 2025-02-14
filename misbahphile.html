@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misbah💕phile</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #ffebee;
+            color: #d32f2f;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        header p {
+            font-size: 14px;
+            color: #f06292;
+        }
+
+        .playlist {
+            margin-top: 20px;
+        }
+
+        .playlist h2, .add-song h2 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        #song-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #song-list li {
+            background-color: #fce4ec;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #song-list li button {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        #song-list li button:hover {
+            background-color: #f06292;
+        }
+
+        .add-song form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .add-song input {
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #f48fb1;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .add-song button {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add-song button:hover {
+            background-color: #f06292;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Misbah💕phile</h1>
+            <p>Your Romantic Playlist</p>
+        </header>
+
+        <div class="playlist">
+            <h2>Your Playlist</h2>
+            <ul id="song-list">
+                <!-- Songs will be added here dynamically -->
+            </ul>
+        </div>
+
+        <div class="add-song">
+            <h2>Add a Song</h2>
+            <form id="add-song-form">
+                <input type="text" id="song-title" placeholder="Song Title" required>
+                <input type="text" id="song-artist" placeholder="Artist" required>
+                <input type="file" id="song-file" accept="audio/*" required>
+                <button type="submit">Add Song</button>
+            </form>
+        </div>
+
+        <audio id="audio-player" controls>
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+
+    <script>
+        // Load saved songs from localStorage
+        const savedSongs = JSON.parse(localStorage.getItem('songs')) || [];
+        const songList = document.getElementById('song-list');
+        const audioPlayer = document.getElementById('audio-player');
+
+        // Function to display songs
+        function displaySongs() {
+            songList.innerHTML = '';
+            savedSongs.forEach((song, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    ${song.title} - ${song.artist}
+                    <button onclick="playSong('${song.url}')">Play</button>
+                    <button onclick="deleteSong(${index})">Delete</button>
+                `;
+                songList.appendChild(li);
+            });
+        }
+
+        // Function to play a song
+        function playSong(url) {
+            audioPlayer.src = url;
+            audioPlayer.play();
+        }
+
+        // Function to delete a song
+        function deleteSong(index) {
+            savedSongs.splice(index, 1);
+            localStorage.setItem('songs', JSON.stringify(savedSongs));
+            displaySongs();
+        }
+
+        // Add a new song
+        document.getElementById('add-song-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const songTitle = document.getElementById('song-title').value;
+            const songArtist = document.getElementById('song-artist').value;
+            const songFile = document.getElementById('song-file').files[0];
+
+            if (songTitle && songArtist && songFile) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const songUrl = e.target.result;
+                    savedSongs.push({ title: songTitle, artist: songArtist, url: songUrl });
+                    localStorage.setItem('songs', JSON.stringify(savedSongs));
+                    displaySongs();
+
+                    // Clear the form
+                    document.getElementById('add-song-form').reset();
+                };
+                reader.readAsDataURL(songFile);
+            }
+        });
+
+        // Display saved songs on page load
+        displaySongs();
+    </script>
+</body>
+</html>
